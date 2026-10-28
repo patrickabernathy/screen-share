@@ -1,0 +1,41 @@
+using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
+
+namespace ScreenShare;
+
+/// <summary>Draws the tray/window icon at runtime so the repo needs no binary assets.</summary>
+internal static class AppIcon
+{
+    [DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr handle);
+
+    public static Icon Create(bool live)
+    {
+        using var bmp = new Bitmap(32, 32);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.Transparent);
+
+            // A monitor outline with a filled "screen", green while sharing, grey otherwise.
+            var screenColor = live ? Color.FromArgb(46, 160, 67) : Color.FromArgb(110, 118, 129);
+            using var frame = new SolidBrush(Color.FromArgb(36, 41, 47));
+            using var screen = new SolidBrush(screenColor);
+            using var stand = new SolidBrush(Color.FromArgb(36, 41, 47));
+            g.FillRectangle(frame, 1, 3, 30, 21);
+            g.FillRectangle(screen, 3, 5, 26, 17);
+            g.FillRectangle(stand, 13, 24, 6, 3);
+            g.FillRectangle(stand, 9, 27, 14, 3);
+        }
+
+        IntPtr handle = bmp.GetHicon();
+        try
+        {
+            return (Icon)Icon.FromHandle(handle).Clone();
+        }
+        finally
+        {
+            DestroyIcon(handle);
+        }
+    }
+}
