@@ -44,7 +44,12 @@ internal sealed class TrayApp : ApplicationContext
             ContextMenuStrip = _menu,
         };
         _tray.DoubleClick += (_, _) => ShowProjector(activate: true);
-        _menu.Opening += (_, _) => BuildMenu();
+        _menu.Opening += (_, e) =>
+        {
+            BuildMenu();
+            // WinForms pre-cancels Opening when the menu is empty, which it is before the first build.
+            e.Cancel = false;
+        };
 
         UpdateStatus();
         RegisterHotkeys(showErrors: true);
@@ -55,7 +60,12 @@ internal sealed class TrayApp : ApplicationContext
         switch (id)
         {
             case ShareHotkeyId:
-                ShareWindow(NativeMethods.GetAncestor(NativeMethods.GetForegroundWindow(), NativeMethods.GA_ROOT));
+                // The share key toggles: pressing it in the window that's already shared stops sharing.
+                var hwnd = NativeMethods.GetAncestor(NativeMethods.GetForegroundWindow(), NativeMethods.GA_ROOT);
+                if (hwnd == _sharedWindow && hwnd != IntPtr.Zero)
+                    StopSharing();
+                else
+                    ShareWindow(hwnd);
                 break;
             case PauseHotkeyId:
                 TogglePause();

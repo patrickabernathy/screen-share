@@ -10,7 +10,7 @@ Meet makes you stop presenting and go back through its picker every time you wan
 2. Put the projector somewhere out of the way, such as a second monitor. It keeps working when other windows cover it, but not when it's minimized.
 3. In Meet: **Present → A window → Screen Share Projector**.
 4. Click any window and press **Ctrl+Alt+S**. That window is now what viewers see. Windows draws a yellow border around it, so you always know what's live.
-5. Press **Ctrl+Alt+S** in another window to switch. Press **Ctrl+Alt+P** to pause, which shows a "Sharing is paused" card, and press it again to resume.
+5. Press **Ctrl+Alt+S** in another window to switch, or press it again in the shared window to stop sharing. Press **Ctrl+Alt+P** to pause, which shows a "Sharing is paused" card, and press it again to resume.
 
 To quit, right-click the tray icon and choose **Exit**. Closing the projector only hides it, so you can't end your meeting share by accident. Double-click the tray icon to bring it back.
 
@@ -32,6 +32,8 @@ dotnet publish src/ScreenShare -c Release -r win-x64 --self-contained false -p:P
 ```
 
 That produces `publish/ScreenShare.exe`. It needs the .NET 10 Desktop Runtime installed. Add `--self-contained true` for a larger exe that runs without it.
+
+The exe's icon is `src/ScreenShare/app.ico`, generated from the same monitor design the app draws at runtime. If you change the design in `AppIcon.cs`, regenerate it with `powershell -File tools/New-AppIcon.ps1`.
 
 ## How it works
 
