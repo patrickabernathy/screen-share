@@ -272,8 +272,17 @@ internal sealed class TrayApp : ApplicationContext
         size.DropDownItems.Add(auto);
         _menu.Items.Add(size);
 
-        var show = new ToolStripMenuItem("Show projector");
-        show.Click += (_, _) => ShowProjector(activate: true);
+        // Mid-share, a projector brought back on screen can be sent off screen again.
+        bool canRehide = _settings.ParkWhileSharing && _sharedWindow != IntPtr.Zero && _parkedFrom is null
+            && _projector.Visible && _projector.WindowState == FormWindowState.Normal;
+        var show = new ToolStripMenuItem(canRehide ? "Hide projector" : "Show projector");
+        show.Click += (_, _) =>
+        {
+            if (canRehide)
+                ParkProjector();
+            else
+                ShowProjector(activate: true);
+        };
         _menu.Items.Add(show);
 
         var settings = new ToolStripMenuItem($"Settings… (share key: {_shareHotkey})");
