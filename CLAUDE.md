@@ -18,6 +18,8 @@ Windows tray app that mirrors a chosen window into a "projector" window, so a me
 
 `TrayApp.cs` owns the state (shared window, paused, parked, source size) and wires everything together. `ProjectorForm.cs` is the window the meeting captures. `WindowCapture.cs` feeds frames to `Renderer.cs`. The README's "Project structure" section lists every file.
 
+macOS support is planned, not started: [docs/mac-support.md](docs/mac-support.md) has the approach (one multi-targeted project, platform folders, shared controller). Read it before restructuring the project or adding cross-platform code.
+
 ## Things that are easy to get wrong
 
 - **The projector's window handle must never change.** The meeting app captures it by handle, and hotkeys and the swap chain are bound to it too. Toggling `FormBorderStyle` (the `Borderless` property) keeps the handle; some other WinForms properties recreate it, so check before changing projector properties at runtime.
