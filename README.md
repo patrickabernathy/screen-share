@@ -1,5 +1,8 @@
 # Screen Share
 
+[![Release](https://img.shields.io/github/v/release/patrickabernathy/screen-share?logo=github)](https://github.com/patrickabernathy/screen-share/releases/latest)
+[![License](https://img.shields.io/github/license/patrickabernathy/screen-share.svg)](LICENSE)
+
 ![.NET](https://img.shields.io/badge/.NET-10-512bd4?logo=dotnet)
 
 Teams-style "share this window" switching for Google Meet (or Zoom, or anything else that can share a window) on Windows 11.
@@ -14,6 +17,7 @@ Meet makes you stop presenting and go back through its picker every time you wan
 - [Settings](#settings)
 - [Not included](#not-included)
 - [For developers](#for-developers)
+- [License](#license)
 
 ## Features
 
@@ -25,6 +29,8 @@ Meet makes you stop presenting and go back through its picker every time you wan
 - **Configurable** — change both shortcuts, whether viewers see your pointer, what the close button does, and whether the projector moves off screen.
 
 ## Using it
+
+Download `ScreenShare.exe` from the [latest release](https://github.com/patrickabernathy/screen-share/releases/latest). It needs the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) on Windows 11.
 
 1. Run `ScreenShare.exe`. A projector window opens, and an icon appears in the system tray. Only one copy runs at a time.
 2. In Meet: **Present → A window → Screen Share Projector**.
@@ -100,6 +106,10 @@ All source is in `src/ScreenShare/`:
 - `SettingsForm.cs`, `AppSettings.cs` — the settings dialog and `settings.json`.
 - `AppIcon.cs`, `TaskbarList.cs` — the runtime icons and the taskbar badge.
 - `NativeMethods.cs` — Win32 calls.
+
+## License
+
+[MIT](LICENSE)
 
 ---
 
