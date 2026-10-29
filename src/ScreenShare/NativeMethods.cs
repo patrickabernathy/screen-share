@@ -6,6 +6,22 @@ namespace ScreenShare;
 internal static partial class NativeMethods
 {
     public const int WM_HOTKEY = 0x0312;
+    public const int WM_NCHITTEST = 0x0084;
+    public const int WM_NCLBUTTONDBLCLK = 0x00A3;
+    public const int WM_GETICON = 0x007F;
+    public const int WM_SETICON = 0x0080;
+    public const int ICON_SMALL = 0;
+    public const int ICON_BIG = 1;
+
+    public const int HTCAPTION = 2;
+    public const int HTLEFT = 10;
+    public const int HTRIGHT = 11;
+    public const int HTTOP = 12;
+    public const int HTTOPLEFT = 13;
+    public const int HTTOPRIGHT = 14;
+    public const int HTBOTTOM = 15;
+    public const int HTBOTTOMLEFT = 16;
+    public const int HTBOTTOMRIGHT = 17;
 
     public const uint MOD_ALT = 0x1;
     public const uint MOD_CONTROL = 0x2;
@@ -31,6 +47,12 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    [LibraryImport("user32.dll", EntryPoint = "RegisterWindowMessageW", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial int RegisterWindowMessage(string name);
+
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    public static partial IntPtr SendMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
 
     [LibraryImport("user32.dll")]
     public static partial IntPtr GetForegroundWindow();

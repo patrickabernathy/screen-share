@@ -5,12 +5,16 @@ internal sealed class SettingsForm : Form
     private readonly HotkeyBox _shareBox = new() { Width = 220 };
     private readonly HotkeyBox _pauseBox = new() { Width = 220 };
     private readonly CheckBox _cursorBox = new() { Text = "Show the mouse pointer to viewers", AutoSize = true };
+    private readonly CheckBox _closeToTrayBox = new() { Text = "Closing the projector hides it to the tray instead of exiting", AutoSize = true };
+    private readonly CheckBox _parkBox = new() { Text = "Move the projector off screen while sharing", AutoSize = true };
 
     public Hotkey ShareHotkey => _shareBox.Value!.Value;
     public Hotkey PauseHotkey => _pauseBox.Value!.Value;
     public bool CaptureCursor => _cursorBox.Checked;
+    public bool CloseToTray => _closeToTrayBox.Checked;
+    public bool ParkWhileSharing => _parkBox.Checked;
 
-    public SettingsForm(Hotkey share, Hotkey pause, bool captureCursor)
+    public SettingsForm(Hotkey share, Hotkey pause, bool captureCursor, bool closeToTray, bool parkWhileSharing)
     {
         Text = "Screen Share Settings";
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -27,6 +31,8 @@ internal sealed class SettingsForm : Form
         _shareBox.Value = share;
         _pauseBox.Value = pause;
         _cursorBox.Checked = captureCursor;
+        _closeToTrayBox.Checked = closeToTray;
+        _parkBox.Checked = parkWhileSharing;
 
         var layout = new TableLayoutPanel
         {
@@ -56,6 +62,10 @@ internal sealed class SettingsForm : Form
         _cursorBox.Margin = new Padding(3, 12, 3, 3);
         layout.Controls.Add(_cursorBox, 0, 3);
         layout.SetColumnSpan(_cursorBox, 2);
+        layout.Controls.Add(_closeToTrayBox, 0, 4);
+        layout.SetColumnSpan(_closeToTrayBox, 2);
+        layout.Controls.Add(_parkBox, 0, 5);
+        layout.SetColumnSpan(_parkBox, 2);
 
         var ok = new Button { Text = "OK", DialogResult = DialogResult.OK, AutoSize = true };
         var cancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, AutoSize = true };
@@ -68,7 +78,7 @@ internal sealed class SettingsForm : Form
         };
         buttons.Controls.Add(cancel);
         buttons.Controls.Add(ok);
-        layout.Controls.Add(buttons, 0, 4);
+        layout.Controls.Add(buttons, 0, 6);
         layout.SetColumnSpan(buttons, 2);
 
         Controls.Add(layout);

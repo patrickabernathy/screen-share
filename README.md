@@ -9,17 +9,17 @@ Meet makes you stop presenting and go back through its picker every time you wan
 1. Run `ScreenShare.exe`. A projector window opens, and an icon appears in the system tray.
 2. Put the projector somewhere out of the way, such as a second monitor. It keeps working when other windows cover it, but not when it's minimized.
 3. In Meet: **Present → A window → Screen Share Projector**.
-4. Click any window and press **Ctrl+Alt+S**. That window is now what viewers see. Windows draws a yellow border around it, so you always know what's live.
+4. Click any window and press **Ctrl+Alt+S**. That window is now what viewers see. Windows draws a yellow border around it, so you always know what's live. While sharing is live, the tray icon and the taskbar button get a green dot. While something is shared, the projector drops its title bar so viewers see only the content, and it moves off screen so your pointer can't land on it (Meet draws the real pointer whenever it's over the shared window). It keeps streaming from there, and it comes back when you stop sharing. To see it mid-share, double-click the tray icon or choose **Show projector**; then drag anywhere in it to move it, and drag its edges to resize. You can turn off the off-screen move in **Settings**.
 5. Press **Ctrl+Alt+S** in another window to switch, or press it again in the shared window to stop sharing. Press **Ctrl+Alt+P** to pause, which shows a "Sharing is paused" card, and press it again to resume.
 
-To quit, right-click the tray icon and choose **Exit**. Closing the projector only hides it, so you can't end your meeting share by accident. Double-click the tray icon to bring it back.
+To quit, close the projector, or right-click the tray icon and choose **Exit**. If you'd rather the close button hide the projector and keep the app running in the tray, turn that on in **Settings**. Double-click the tray icon to bring a hidden projector back.
 
 ### Tray menu
 
 - **Share window**: pick from the list of open windows with the mouse instead of the shortcut.
 - **Pause / Stop sharing**
-- **Projector size**: 1280×720 or 1920×1080. Meet sends the projector at roughly its on-screen size, so 1080p reads best for code and slides. You can also resize it freely.
-- **Settings**: change both shortcuts and choose whether viewers see your mouse pointer.
+- **Projector size**: 1280×720, 1920×1080, or **Auto**, which keeps the projector the same size as the shared window, even as you resize that window. A window bigger than the projector's screen is scaled down to fit. Meet sends the projector at roughly its on-screen size, so 1080p reads best for code and slides. You can also resize it freely.
+- **Settings**: change both shortcuts, choose whether viewers see your mouse pointer, choose whether closing the projector exits or hides it to the tray, and choose whether the projector moves off screen while sharing.
 
 Settings are saved to `%APPDATA%\ScreenShare\settings.json`.
 
@@ -31,7 +31,7 @@ Requires Windows 11 (22H2 or later) and the .NET 10 SDK.
 dotnet publish src/ScreenShare -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish
 ```
 
-That produces `publish/ScreenShare.exe`. It needs the .NET 10 Desktop Runtime installed. Add `--self-contained true` for a larger exe that runs without it.
+Or run `publish.bat` from the repo root, which runs the same command. That produces `publish/ScreenShare.exe`. It needs the .NET 10 Desktop Runtime installed. Add `--self-contained true` for a larger exe that runs without it.
 
 The exe's icon is `src/ScreenShare/app.ico`, generated from the same monitor design the app draws at runtime. If you change the design in `AppIcon.cs`, regenerate it with `powershell -File tools/New-AppIcon.ps1`.
 

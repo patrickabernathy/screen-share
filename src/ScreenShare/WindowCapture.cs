@@ -19,6 +19,9 @@ internal sealed class WindowCapture : IDisposable
     /// <summary>Raised on a capture thread when the shared window closes.</summary>
     public event Action? SourceClosed;
 
+    /// <summary>Raised with the shared window's size when capture starts and whenever that window is resized (may be on a capture thread).</summary>
+    public event Action<SizeInt32>? SourceSizeChanged;
+
     public WindowCapture(Renderer renderer) => _renderer = renderer;
 
     public void Start(IntPtr hwnd, bool captureCursor)
@@ -42,6 +45,7 @@ internal sealed class WindowCapture : IDisposable
         _framePool = framePool;
         _session = session;
         session.StartCapture();
+        SourceSizeChanged?.Invoke(_poolSize);
     }
 
     public void Stop()
@@ -69,6 +73,7 @@ internal sealed class WindowCapture : IDisposable
         {
             _poolSize = frame.ContentSize;
             sender.Recreate(_renderer.WinRtDevice, DirectXPixelFormat.B8G8R8A8UIntNormalized, 2, _poolSize);
+            SourceSizeChanged?.Invoke(_poolSize);
         }
 
         using var texture = CaptureInterop.GetTexture(frame.Surface);

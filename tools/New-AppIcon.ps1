@@ -1,5 +1,5 @@
 # Regenerates src/ScreenShare/app.ico, the icon embedded in ScreenShare.exe.
-# It draws the same idle (grey) monitor as AppIcon.Create, so keep the two in sync if the design changes.
+# It draws the same monitor as AppIcon.Create (without the sharing dot), so keep the two in sync if the design changes.
 # Usage: powershell -File tools/New-AppIcon.ps1
 
 Add-Type -AssemblyName System.Drawing
@@ -9,10 +9,10 @@ $out = Join-Path $PSScriptRoot '..\src\ScreenShare\app.ico'
 
 # The design is laid out on a 32px grid; each rect is x, y, w, h on that grid.
 $dark = [System.Drawing.Color]::FromArgb(36, 41, 47)
-$grey = [System.Drawing.Color]::FromArgb(110, 118, 129)
+$blue = [System.Drawing.Color]::FromArgb(96, 178, 245)
 $shapes = @(
     @{ Color = $dark; Rect = 1, 3, 30, 21 },   # frame
-    @{ Color = $grey; Rect = 3, 5, 26, 17 },   # screen
+    @{ Color = $blue; Rect = 3, 5, 26, 17 },   # screen
     @{ Color = $dark; Rect = 13, 24, 6, 3 },   # stand neck
     @{ Color = $dark; Rect = 9, 27, 14, 3 }    # stand base
 )
