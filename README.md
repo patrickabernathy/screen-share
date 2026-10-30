@@ -23,10 +23,10 @@ Meet makes you stop presenting and go back through its picker every time you wan
 
 - **One share, any window** — share the projector once, then switch what viewers see with **Ctrl+Alt+S** without touching Meet.
 - **Pause and stop from the keyboard** — **Ctrl+Alt+P** shows a "Sharing is paused" card; **Ctrl+Alt+S** in the shared window stops sharing.
-- **Clean output** — while sharing, the projector drops its title bar and moves off screen, so viewers see only the content and no stray mouse pointers.
+- **Clean output** — while sharing, the projector drops its title bar, so viewers see only the content.
 - **Auto size** — the projector can follow the shared window's size, even when you resize that window mid-share.
 - **Always know what's live** — Windows draws a yellow border around the shared window, and the tray icon and taskbar button get a green dot.
-- **Configurable** — change both shortcuts, whether viewers see your pointer, what the close button does, and whether the projector moves off screen.
+- **Configurable** — change both shortcuts, whether viewers see your pointer, and what the close button does.
 
 ## Using it
 
@@ -41,10 +41,9 @@ While something is shared:
 
 - Windows draws a yellow border around the shared window, and the tray icon and taskbar button get a green dot.
 - The projector drops its title bar so viewers see only the content.
-- The projector moves off screen, so your pointer can't land on it (Meet draws your real pointer whenever it's over the shared window). It keeps streaming from there and comes back when you stop sharing.
-- To see the projector mid-share, double-click the tray icon or choose **Show projector**. Drag anywhere in it to move it, and drag its edges to resize. Choose **Hide projector** to send it back off screen.
+- Drag anywhere in the projector to move it, and drag its edges to resize.
 
-If you turn off the off-screen move in **Settings**, keep the projector somewhere out of the way, such as a second monitor. It keeps working when other windows cover it, but not when it's minimized.
+Keep the projector somewhere out of the way, such as a second monitor. It keeps working when other windows cover it, but not when it's minimized. Meet draws your real pointer whenever it's over the shared window, so keep the pointer off the projector.
 
 To quit, close the projector, or right-click the tray icon and choose **Exit**. If you'd rather the close button hide the projector and keep the app running in the tray, turn that on in **Settings**. Double-click the tray icon to bring a hidden projector back.
 
@@ -52,8 +51,8 @@ To quit, close the projector, or right-click the tray icon and choose **Exit**. 
 
 - **Share window**: pick from the list of open windows with the mouse instead of the shortcut.
 - **Pause sharing / Resume sharing** and **Stop sharing**
-- **Projector size**: 1280×720, 1920×1080, or **Auto (match shared window)**, which keeps the projector the same size as the shared window, even as you resize that window. A window bigger than the projector's screen is scaled down to fit. Meet sends the projector at roughly its on-screen size, so 1080p reads best for code and slides. You can also resize it freely.
-- **Show projector / Hide projector**: bring the projector back on screen, or, mid-share, send it off screen again.
+- **Projector size**: 1280×720, 1920×1080, or **Auto (match shared window)**, which keeps the projector the same size as the shared window, even as you resize that window. A window bigger than the projector's screen is scaled down to fit. When you stop sharing, the projector shrinks back to the size it had before you picked Auto. Meet sends the projector at roughly its on-screen size, so 1080p reads best for code and slides. You can also resize it freely.
+- **Show projector**: bring the projector to the front.
 - **Settings**
 - **Exit**
 
@@ -62,7 +61,6 @@ To quit, close the projector, or right-click the tray icon and choose **Exit**. 
 - **Shortcuts**: change the share and pause shortcuts. Click a box, then press the new shortcut.
 - **Show the mouse pointer to viewers**
 - **Closing the projector hides it to the tray instead of exiting** (off by default, so the close button exits)
-- **Move the projector off screen while sharing** (on by default)
 
 Settings are saved to `%APPDATA%\ScreenShare\settings.json`.
 
@@ -88,7 +86,6 @@ The exe's icon is `src/ScreenShare/app.ico`, generated from the same monitor des
 
 - **Capture:** Windows.Graphics.Capture records the chosen window on the GPU. It works while the window is covered or on another monitor, and it handles resizes.
 - **Projector:** Direct3D 11 and Direct2D draw each frame into the projector, scaled to fit with the aspect ratio kept. The swap chain uses the blt model on purpose, so every capturer can read the projector, including older GDI-based window capture.
-- **Off screen:** Windows keeps drawing a shown window even when it's off every monitor, so the meeting's capture of the projector keeps running while it's parked past the desktop edge.
 - **Shortcuts:** global hotkeys come from `RegisterHotKey`. The app is a normal desktop program, not a service.
 
 ### Project structure
@@ -96,7 +93,7 @@ The exe's icon is `src/ScreenShare/app.ico`, generated from the same monitor des
 All source is in `src/ScreenShare/`:
 
 - `Program.cs` — entry point, the one-copy check, and the capture-support check.
-- `TrayApp.cs` — tray icon and menu, hotkeys, sharing state, and projector sizing and parking.
+- `TrayApp.cs` — tray icon and menu, hotkeys, sharing state, and projector sizing.
 - `ProjectorForm.cs` — the projector window: borderless mode, hotkey messages, taskbar badge, and close behavior.
 - `WindowCapture.cs` — the Windows.Graphics.Capture session for the shared window.
 - `Renderer.cs` — draws the latest frame, or a placeholder card, into the projector.

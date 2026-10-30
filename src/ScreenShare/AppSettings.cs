@@ -13,8 +13,6 @@ internal sealed class AppSettings
     public string PauseHotkey { get; set; } = "Ctrl+Alt+P";
     public bool CaptureCursor { get; set; } = true;
     public bool CloseToTray { get; set; }
-    /// <summary>When true, the projector moves off screen while sharing, so the pointer can't land on it.</summary>
-    public bool ParkWhileSharing { get; set; } = true;
     public int ProjectorWidth { get; set; } = 1920;
     public int ProjectorHeight { get; set; } = 1080;
     /// <summary>When true, the projector resizes to match the shared window instead of keeping a fixed size.</summary>

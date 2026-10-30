@@ -20,7 +20,6 @@ internal sealed class TrayApp : ApplicationContext
     private IntPtr _sharedWindow;
     private string _sharedTitle = string.Empty;
     private Size _sourceSize;
-    private Point? _parkedFrom;
     private bool _paused;
     private bool _toldAboutTray;
     private SettingsForm? _settingsForm;
@@ -110,7 +109,6 @@ internal sealed class TrayApp : ApplicationContext
         _paused = false;
         UpdateStatus();
         ShowProjector(activate: false);
-        ParkProjector();
     }
 
     private void StopSharing()
@@ -122,7 +120,7 @@ internal sealed class TrayApp : ApplicationContext
         _sourceSize = Size.Empty;
         _paused = false;
         UpdateStatus();
-        UnparkProjector();
+        RestoreFixedSize();
     }
 
     private void TogglePause()
@@ -175,34 +173,7 @@ internal sealed class TrayApp : ApplicationContext
         if (_projector.WindowState == FormWindowState.Minimized)
             _projector.WindowState = FormWindowState.Normal;
         if (activate)
-        {
-            // Asking to see the projector brings it back from off screen; the next share parks it again.
-            UnparkProjector();
             _projector.Activate();
-        }
-    }
-
-    /// <summary>
-    /// Moves the projector past the right edge of the desktop while sharing. The meeting app draws the real pointer
-    /// whenever it's over the captured window, so a projector you can hover adds stray pointers to the share.
-    /// Windows keeps drawing a shown window even when it's off every monitor, so the capture keeps running.
-    /// </summary>
-    private void ParkProjector()
-    {
-        if (!_settings.ParkWhileSharing || _parkedFrom is not null || _projector.WindowState != FormWindowState.Normal)
-            return;
-        _parkedFrom = _projector.Location;
-        var desktop = SystemInformation.VirtualScreen;
-        _projector.Location = new Point(desktop.Right + 100, desktop.Top);
-    }
-
-    private void UnparkProjector()
-    {
-        if (_parkedFrom is not { } from)
-            return;
-        _parkedFrom = null;
-        _projector.Location = from;
-        KeepProjectorOnScreen();
     }
 
     /// <summary>Slides the projector back inside its screen's working area if any of it is past an edge.</summary>
@@ -272,17 +243,8 @@ internal sealed class TrayApp : ApplicationContext
         size.DropDownItems.Add(auto);
         _menu.Items.Add(size);
 
-        // Mid-share, a projector brought back on screen can be sent off screen again.
-        bool canRehide = _settings.ParkWhileSharing && _sharedWindow != IntPtr.Zero && _parkedFrom is null
-            && _projector.Visible && _projector.WindowState == FormWindowState.Normal;
-        var show = new ToolStripMenuItem(canRehide ? "Hide projector" : "Show projector");
-        show.Click += (_, _) =>
-        {
-            if (canRehide)
-                ParkProjector();
-            else
-                ShowProjector(activate: true);
-        };
+        var show = new ToolStripMenuItem("Show projector");
+        show.Click += (_, _) => ShowProjector(activate: true);
         _menu.Items.Add(show);
 
         var settings = new ToolStripMenuItem($"Settings… (share key: {_shareHotkey})");
@@ -299,6 +261,8 @@ internal sealed class TrayApp : ApplicationContext
     private void SetProjectorSize(int width, int height)
     {
         _settings.ProjectorAutoSize = false;
+        _settings.ProjectorWidth = width;
+        _settings.ProjectorHeight = height;
         _settings.Save();
         _projector.WindowState = FormWindowState.Normal;
         _projector.ClientSize = new Size(width, height);
@@ -307,6 +271,12 @@ internal sealed class TrayApp : ApplicationContext
 
     private void SetProjectorAutoSize()
     {
+        // Remember the size in use now, so the projector can go back to it whenever nothing is shared.
+        if (!_settings.ProjectorAutoSize && _projector.WindowState == FormWindowState.Normal)
+        {
+            _settings.ProjectorWidth = _projector.ClientSize.Width;
+            _settings.ProjectorHeight = _projector.ClientSize.Height;
+        }
         _settings.ProjectorAutoSize = true;
         _settings.Save();
         _projector.WindowState = FormWindowState.Normal;
@@ -324,9 +294,7 @@ internal sealed class TrayApp : ApplicationContext
             || _projector.WindowState != FormWindowState.Normal)
             return;
 
-        // While parked, size against the screen the projector will return to.
-        var home = _parkedFrom is { } from ? new Rectangle(from, _projector.Size) : _projector.Bounds;
-        var area = Screen.FromRectangle(home).WorkingArea;
+        var area = Screen.FromControl(_projector).WorkingArea;
         double scale = Math.Min(1.0, Math.Min((double)area.Width / _sourceSize.Width, (double)area.Height / _sourceSize.Height));
         var size = new Size((int)Math.Round(_sourceSize.Width * scale), (int)Math.Round(_sourceSize.Height * scale));
         if (_projector.ClientSize == size)
@@ -334,9 +302,16 @@ internal sealed class TrayApp : ApplicationContext
         _projector.ClientSize = size;
 
         // Growing can push the projector past the screen edge; slide it back so all of it stays visible.
-        // A parked projector is meant to be off screen; UnparkProjector does this when it comes back.
-        if (_parkedFrom is null)
-            KeepProjectorOnScreen();
+        KeepProjectorOnScreen();
+    }
+
+    /// <summary>In auto size, shrinks the projector back to the last fixed size once nothing is shared.</summary>
+    private void RestoreFixedSize()
+    {
+        if (!_settings.ProjectorAutoSize || _projector.WindowState != FormWindowState.Normal)
+            return;
+        _projector.ClientSize = new Size(_settings.ProjectorWidth, _settings.ProjectorHeight);
+        KeepProjectorOnScreen();
     }
 
     private void OpenSettings()
@@ -354,7 +329,7 @@ internal sealed class TrayApp : ApplicationContext
             while (true)
             {
                 using var form = new SettingsForm(
-                    _shareHotkey, _pauseHotkey, _settings.CaptureCursor, _settings.CloseToTray, _settings.ParkWhileSharing);
+                    _shareHotkey, _pauseHotkey, _settings.CaptureCursor, _settings.CloseToTray);
                 _settingsForm = form;
                 if (form.ShowDialog() != DialogResult.OK)
                     break;
@@ -366,11 +341,6 @@ internal sealed class TrayApp : ApplicationContext
                 _settings.CaptureCursor = form.CaptureCursor;
                 _settings.CloseToTray = form.CloseToTray;
                 _projector.CloseToTray = form.CloseToTray;
-                _settings.ParkWhileSharing = form.ParkWhileSharing;
-                if (!_settings.ParkWhileSharing)
-                    UnparkProjector();
-                else if (_sharedWindow != IntPtr.Zero)
-                    ParkProjector();
                 _settings.Save();
                 UpdateStatus();
 
