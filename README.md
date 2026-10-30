@@ -68,6 +68,8 @@ Settings are saved to `%APPDATA%\ScreenShare\settings.json`.
 
 The real taskbar hover button ("Share this window") is a Windows API (`ShareWindowCommandSource`) that Microsoft gates as a Limited Access Feature, so a personal app can't turn it on. The keyboard shortcut and the tray menu stand in for it.
 
+Screen Share is Windows-only for now. A macOS version is planned but not started; see [docs/mac-support.md](docs/mac-support.md).
+
 ## For developers
 
 ### Building
