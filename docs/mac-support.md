@@ -76,7 +76,7 @@ The SDK defines `WINDOWS` and `MACOS` automatically for each target, so `#if WIN
 ```
 src/ScreenShare/
   AppSettings.cs, Hotkey.cs          ← shared (platform-neutral parts)
-  SharingController.cs               ← shared: share / pause / switch / stop / park state, pulled out of TrayApp.cs
+  SharingController.cs               ← shared: share / pause / switch / stop state, pulled out of TrayApp.cs
   IWindowCapture.cs, IProjector.cs,  ← shared interfaces the controller talks to
   IGlobalHotkeys.cs, ITrayIcon.cs,
   IWindowList.cs
@@ -100,7 +100,7 @@ Native UI on each side, not Avalonia: a shared Avalonia UI would mean copying ev
 | `Hotkey.cs` `RegisterHotKey` | Carbon `RegisterEventHotKey` (P/Invoke into Carbon) | Doesn't need the Accessibility permission. Defaults: Ctrl+Option+S and Ctrl+Option+P mirror the Windows ones; `HotkeyBox.cs` needs Mac modifier names (⌃⌥⇧⌘). |
 | `GetForegroundWindow` (which window to share on the hotkey) | `NSWorkspace.SharedWorkspace.FrontmostApplication`, then the first layer-0 window for that PID from `CGWindowListCopyWindowInfo` (front-to-back order) | Match it to an `SCWindow` by window ID. |
 | `WindowList.cs` (`EnumWindows`, cloaking, tool windows) | `SCShareableContent.GetShareableContent`, filtered to on-screen, layer-0, titled windows that aren't ours | |
-| `SettingsForm.cs` | An AppKit settings window | Same four settings. |
+| `SettingsForm.cs` | An AppKit settings window | Same settings: the two shortcuts, showing the pointer, and close-to-tray. |
 | `AppSettings.cs` path `%APPDATA%\ScreenShare\settings.json` | `~/Library/Application Support/ScreenShare/settings.json` | Make the path platform-aware; the JSON stays the same. |
 | One-copy check in `Program.cs` | A named lock file or `NSRunningApplication` check by bundle ID | |
 | Windows' yellow capture border on the shared window | None. macOS shows its own screen-recording indicator in the menu bar | The menu-bar icon change has to carry "what's live" on its own. |
@@ -109,7 +109,7 @@ Native UI on each side, not Avalonia: a shared Avalonia UI would mean copying ev
 
 Prove these with a throwaway test app on a real Mac before building anything else. Either one can change the design.
 
-1. **Parking the projector off screen.** On Windows the projector moves past the desktop edge while sharing so the presenter's pointer can't land on it, and Windows keeps drawing it. On macOS, check both: can a borderless window be placed fully off every screen (titled windows get pulled back on screen), and does Meet in Chrome keep receiving frames from it while it's there? If either fails, the fallback is keeping the projector on a second display or in a corner, and the "Move the projector off screen" setting becomes Windows-only.
+1. **A covered projector keeps streaming.** The presenter keeps the projector out of the way, on a second display or behind other windows, and Meet has to keep receiving frames from it there. macOS can throttle drawing for fully occluded windows (window occlusion state, App Nap), so confirm Meet in Chrome still gets live frames from a projector that's completely covered. Don't try parking it off screen: the Windows version did that, and in a live class Meet stopped showing updates, so the feature was removed.
 2. **Screen Recording permission prompts.** ScreenCaptureKit needs the permission, and recent macOS versions re-ask periodically for apps that capture without going through the system's own picker. Check how often a tester actually gets re-prompted and whether that's tolerable mid-class. The system picker (`SCContentSharingPicker`) avoids it but brings back a picker step, which is what the app exists to remove.
 3. **Capturing a covered or other-display window.** Windows.Graphics.Capture keeps capturing a window that's covered or on another monitor. Confirm a single-window `SCContentFilter` does the same, and note what happens when the shared window is minimized.
 
@@ -141,7 +141,7 @@ For whoever tests on a Mac:
 - [ ] Ctrl+Option+P shows the "Sharing is paused" card and resumes
 - [ ] The shared window covered by another window, and moved to a second display: viewers still see it
 - [ ] The shared window resized mid-share: no cropping or stretching
-- [ ] Projector parked off screen: viewers still see frames, and the presenter's pointer never appears on it
+- [ ] Projector fully covered by other windows, and moved to a second display: viewers still see live frames
 - [ ] "Show the mouse pointer to viewers" on and off
 - [ ] Menu-bar icon shows when something is shared
 - [ ] Quitting from the menu-bar icon and from the projector's close button
